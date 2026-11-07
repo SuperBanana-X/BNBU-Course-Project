@@ -22,9 +22,3 @@ The collection includes source code, notebooks, reports, presentation slides, an
 | [Supply Chain Management and Logistics](./SCML✅/) | Studied supply chain optimization for meal delivery. |
 | [Simulation and Risk Analysis](./SRA✅/) | Used Monte Carlo simulation and queueing analysis to evaluate whether a milk tea shop should add staff during peak hours. |
 | [Statistical Reasoning for Business Decisions](./SRBD✅/) | Evaluated the impact of promotional emails on customer conversion using A/B testing and the Hillstrom dataset. |
-
-## Where to Start
-
-- For a working application, see the [ETF trading platform](./Fintech✅/fintech_etf_platform/), which includes setup instructions.
-- For a visualization project, see the [Power BI hotel analysis](./DV✅/).
-- For an applied statistics example, see the [email campaign A/B test](./SRBD✅/).
