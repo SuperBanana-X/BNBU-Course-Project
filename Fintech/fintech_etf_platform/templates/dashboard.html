@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ platform_title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dashboard-shell">
+  <header class="topbar">
+    <div>
+      <h1>{{ platform_title }}</h1>
+      <p>{{ target_asset }} · Date range: {{ date_range }}</p>
+    </div>
+    <div class="topbar-actions">
+      <span class="status-pill {{ market_status_class }}">{{ market_status }}</span>
+      <span class="status-pill ok">{{ database_status }}</span>
+      <span class="last-update">Last update: {{ last_update }}</span>
+      <a class="logout-button" href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  </header>
+
+  <main class="dashboard-main">
+    {% if system_errors %}
+      <section class="notice-strip">
+        {% for item in system_errors %}
+          <span>{{ item }}</span>
+        {% endfor %}
+      </section>
+    {% endif %}
+
+    <section class="workstation-layout">
+      <aside class="module-nav" aria-label="Dashboard modules">
+        <button class="module-tab active" data-module="overview">Overview</button>
+        <button class="module-tab" data-module="market">Market Data</button>
+        <button class="module-tab" data-module="technical">Technical Indicators</button>
+        <button class="module-tab" data-module="sentiment">Sentiment Layer</button>
+        <button class="module-tab" data-module="rl">RL Decision Layer</button>
+        <button class="module-tab" data-module="portfolio">Portfolio</button>
+        <button class="module-tab" data-module="ablation">Ablation Study</button>
+        <button class="module-tab" data-module="health">Pipeline Health</button>
+      </aside>
+
+      <div class="module-content">
+        <section class="module-view active" data-module-view="overview">
+          <div class="section-heading">
+            <h2>Executive Overview</h2>
+            <span>Layered workstation summary</span>
+          </div>
+          <div class="overview-console">
+            <div class="overview-lead">
+              <span class="eyebrow">Southern Semiconductor ETF 159325</span>
+              <h3>NLP-RL Strategy Workstation</h3>
+              <p>{{ data_source_detail }}</p>
+              <div class="overview-tape">
+                <span>Latest Trading Day <strong>{{ overview_primary.date }}</strong></span>
+                <span>Market Data <strong>{{ overview_primary.mode }}</strong></span>
+                <span>RL Action <strong>{{ overview_primary.action }}</strong></span>
+              </div>
+            </div>
+
+            <div class="overview-price">
+              <span>Latest Close</span>
+              <strong>{{ overview_primary.close }}</strong>
+              <em>Portfolio {{ overview_primary.portfolio }}</em>
+              <em>DQN Sentiment Return {{ overview_primary.strategy_return }}</em>
+              <em>ETF Cumulative Return {{ overview_primary.etf_return }}</em>
+            </div>
+
+            <div class="overview-flow">
+              {% for item in overview_flow %}
+                <div class="flow-node">
+                  <span>{{ item.title }}</span>
+                  <strong>{{ item.value }}</strong>
+                  <em>{{ item.label }}</em>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="overview-watchlist">
+              {% for item in overview_watchlist %}
+                <div>
+                  <span>{{ item.label }}</span>
+                  <strong>{{ item.value }}</strong>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="overview-strip">
+            {% for card in cards[:6] %}
+              <span><b>{{ card.label }}</b>{{ card.value }}</span>
+            {% endfor %}
+          </div>
+        </section>
+
+        <section class="module-view" data-module-view="market">
+          <div class="section-heading">
+            <h2>Market Data</h2>
+            <span>Real ETF OHLCV when AkShare is connected; fallback data is explicitly labeled</span>
+          </div>
+          <div class="chart-grid two">
+            <div class="chart-panel">{{ charts.price | safe }}</div>
+            <div class="chart-panel">{{ charts.volume | safe }}</div>
+          </div>
+          <div class="split-grid">
+            <div class="table-panel">
+              <h3>OHLCV History</h3>
+              <div class="table-scroll">
+                <table>
+                  <thead><tr>{% for key in recent_ohlcv[0].keys() %}<th>{{ key }}</th>{% endfor %}</tr></thead>
+                  <tbody>
+                    {% for row in recent_ohlcv %}
+                      <tr>{% for value in row.values() %}<td>{{ value }}</td>{% endfor %}</tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="table-panel">
+              <h3>Latest Technical Feature Values</h3>
+              <table>
+                <tbody>
+                  {% for row in technical_rows %}
+                    <tr><th>{{ row.metric }}</th><td>{{ row.value }}</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="module-view" data-module-view="technical">
+          <div class="section-heading">
+            <h2>Technical Indicator Section</h2>
+            <span>RSI, MACD, volatility, crossover context</span>
+          </div>
+          <div class="chart-grid three">
+            <div class="chart-panel">{{ charts.rsi | safe }}</div>
+            <div class="chart-panel">{{ charts.macd | safe }}</div>
+            <div class="chart-panel">{{ charts.cash_value | safe }}</div>
+          </div>
+        </section>
+
+        <section class="module-view" data-module-view="sentiment">
+          <div class="section-heading">
+            <h2>Sentiment Feature Layer</h2>
+            <span>FinBERT-Compatible Sentiment Signal</span>
+          </div>
+          <div class="split-grid">
+            <div class="chart-panel">{{ charts.sentiment | safe }}</div>
+            <div class="table-panel">
+              <h3>NLP Sentiment Feature Layer</h3>
+              <table>
+                <tbody>
+                  {% for row in sentiment_rows %}
+                    <tr><th>{{ row.metric }}</th><td>{{ row.value }}</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="module-view" data-module-view="rl">
+          <div class="section-heading">
+            <h2>RL Trading Decision Layer</h2>
+            <span>DQN · epsilon {{ latest.epsilon }} · position {{ latest.position }} · cash {{ latest.cash }}</span>
+          </div>
+          <div class="chart-grid two">
+            <div class="chart-panel">{{ charts.actions | safe }}</div>
+            <div class="table-panel">
+              <h3>Sentiment-Enhanced RL State</h3>
+              <div class="state-date">Selected trading day: <strong id="selected-state-date">{{ selected_state_date }}</strong></div>
+              <table>
+                <tbody>
+                  {% for row in state_rows %}
+                    <tr><th>{{ row.metric }}</th><td data-state-field="{{ row.metric | replace(' ', '_') }}">{{ row.value }}</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="table-panel wide">
+            <h3>Latest Agent Decisions</h3>
+            <table>
+              <thead><tr>{% for key in decision_rows[0].keys() %}<th>{{ key }}</th>{% endfor %}</tr></thead>
+              <tbody>
+                {% for row in decision_rows %}
+                  <tr>{% for value in row.values() %}<td>{{ value }}</td>{% endfor %}</tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="module-view" data-module-view="portfolio">
+          <div class="section-heading">
+            <h2>Portfolio Performance</h2>
+            <span>Portfolio value, benchmark, drawdown, cash, market value</span>
+          </div>
+          <div class="chart-grid two">
+            <div class="chart-panel">{{ charts.portfolio | safe }}</div>
+            <div class="chart-panel">{{ charts.drawdown | safe }}</div>
+          </div>
+        </section>
+
+        <section class="module-view" data-module-view="ablation">
+          <div class="section-heading">
+            <h2>Ablation Study</h2>
+            <span>With sentiment feature vs without sentiment feature vs buy-and-hold</span>
+          </div>
+          <div class="chart-panel">{{ charts.ablation | safe }}</div>
+          <p class="conclusion">{{ ablation_conclusion }}</p>
+          <div class="table-panel wide">
+            <table>
+              <thead><tr>{% for key in ablation_rows[0].keys() %}<th>{{ key }}</th>{% endfor %}</tr></thead>
+              <tbody>
+                {% for row in ablation_rows %}
+                  <tr>{% for value in row.values() %}<td>{{ value }}</td>{% endfor %}</tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="module-view" data-module-view="health">
+          <div class="section-heading">
+            <h2>Data Pipeline Health</h2>
+            <span>Bronze, Silver, Gold, database, and topic status</span>
+          </div>
+          <div class="table-panel wide">
+            <table>
+              <thead>
+                <tr><th>Module</th><th>Status</th><th>Record Count</th><th>Last Update Time</th></tr>
+              </thead>
+              <tbody>
+                {% for row in health_rows %}
+                  <tr>
+                    <td>{{ row.module }}</td>
+                    <td><span class="mini-status">{{ row.status }}</span></td>
+                    <td>{{ row.record_count }}</td>
+                    <td>{{ row.last_update }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+  <script id="rl-state-data" type="application/json">{{ rl_state_records | tojson }}</script>
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

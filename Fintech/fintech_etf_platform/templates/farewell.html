@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Session Closed</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="farewell-shell">
+  <main class="farewell-panel">
+    <div class="firework one"></div>
+    <div class="firework two"></div>
+    <div class="firework three"></div>
+    <span class="system-label">Session Closed</span>
+    <h1>May you become a billionaire in the future.</h1>
+    <p>Your research workstation session has ended successfully.</p>
+    <a class="logout-button" href="{{ url_for('login') }}">Return to Login</a>
+  </main>
+</body>
+</html>

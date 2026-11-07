@@ -1,0 +1,278 @@
+---
+title: "group project"
+author: "Group A"
+date: "2024-11-27"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r}
+library(tidyverse)
+library(car)
+library(GGally)
+library(psych)
+library(forecast)
+```
+
+# Data Preparation
+## data import
+```{r}
+data <- read_csv("R_language_group_project.csv")
+data
+```
+## summary data
+```{r}
+glimpse(data)
+```
+## Check missing value
+```{r}
+# Check missing value
+sapply(data, function(x) sum(is.na(x)))
+```
+## Visualization Preparation
+```{r}
+# Transform Date to datetime format
+data$Date <- as.Date(data$Date, format = "%Y/%m/%d")
+```
+
+# Visualization
+## Time serues & Scatter PLot
+
+```{r}
+# Time Series curve
+ggplot(data, aes(x = Date, y = money_deal)) +
+  geom_line(color = "#4A90E2") + 
+  theme_minimal() +
+  labs(title = "Time Series of Money Deal", x = "Date", y = "Money Deal")
+
+ggplot(data, aes(x = Date, y = count_view)) +
+  geom_line(color = "#7F8C8D") +  
+  theme_minimal() +
+  labs(title = "Time Series of Count View", x = "Date", y = "Count View")
+
+ggplot(data, aes(x = Date, y = count_deal)) +
+  geom_line(color = "#27AE60") +  
+  theme_minimal() +
+  labs(title = "Time Series of Count Deal", x = "Date", y = "Count Deal")
+
+# Scatter plot
+ggplot(data, aes(x = count_view, y = money_deal)) +
+  geom_point(color = "#9B59B6") + 
+  theme_minimal() +
+  labs(title = "Scatter Plot of Count View vs Money Deal", x = "Count View", y = "Money Deal")
+
+ggplot(data, aes(x = bounce_rate, y = money_deal)) +
+  geom_point(color = "#F39C12") +  
+  theme_minimal() +
+  labs(title = "Scatter Plot of Bounce Rate vs Money Deal", x = "Bounce Rate", y = "Money Deal")
+
+ggplot(data, aes(x = count_visitor, y = money_deal)) +
+  geom_point(color = "#F39") +  
+  theme_minimal() +
+  labs(title = "Scatter Plot of Count Visitor vs Money Deal", x = "Count Visitor", y = "Money Deal")
+
+
+```
+
+# Descriptive Statistic
+## Measures of Location & Measures of Dispersion
+```{r}
+
+summary(data[,c("Date","money_deal","count_deal","count_view","bounce_rate")])
+```
+
+```{r}
+skew(data$money_deal)
+
+hist(data$money_deal, 
+     probability = TRUE,  
+     col = rgb(0.2, 0.6, 0.8, 0.5), 
+     main = "Histogram with Money Deal", 
+     xlab = "Money Deal", 
+     ylab = "Frequency")
+
+# 添加密度曲线
+lines(density(data$money_deal), col = "orange", lwd = 2)
+
+
+kurtosi(data$money_deal)
+
+
+```
+
+
+
+## outlier - boxplot
+```{r}
+
+ggplot(data, aes(x = "", y = money_deal)) +
+  geom_boxplot(fill = "#4A90E2", color = "black") + 
+  theme_minimal() +
+  labs(title = "Boxplot of Money Deal", x = "", y = "Money Deal")
+
+```
+```{r}
+Q1 <- quantile(data$money_deal, 0.25)
+Q3 <- quantile(data$money_deal, 0.75)
+IQR_value <- Q3-Q1
+
+lower_limit <- Q1 - 1.5 * IQR_value
+upper_limit <- Q3 + 1.5 * IQR_value
+mild_outliers <- data[data$money_deal < lower_limit | data$money_deal > upper_limit, ]
+
+df<-subset(data,lower_limit <= money_deal &  money_deal <= upper_limit)
+df
+```
+
+
+# Statistical Inference
+## Paired t-test
+```{r}
+# Extract data from 2020/6/3 to 2020/6/18
+start_date_1 <- as.Date("2020-06-18") - 15
+end_date_1 <- as.Date("2020-06-18") 
+data_1 <- data[(data$Date >= start_date_1 & data$Date <= end_date_1), ]
+
+# Extract data from 2019/10/27 to 2019/11/11
+start_date_2 <- as.Date("2019-11-11")  - 15
+end_date_2 <- as.Date("2019-11-11") 
+data_2 <- data[(data$Date >= start_date_2 & data$Date <= end_date_2), ]
+
+# Make sure the number of rows are the same
+if (nrow(data_1) == nrow(data_2)) {
+  # paired test
+  paired_test_result <- t.test(data_1$money_deal, data_2$money_deal, paired = TRUE, alternative = "less")
+  print(paired_test_result)
+} else {
+  print("The number of rows are not the same. Paired test cannot be done.")
+}
+```
+
+## ANOVA
+```{r}
+# Date Range 1: From 2019-06-01 to 2019-08-31
+start_date_1 <- as.Date("2019-06-01")
+end_date_1 <- as.Date("2019-08-31")
+data_1 <- data[(data$Date >= start_date_1 & data$Date <= end_date_1), ]
+
+# Date Range 2: From 2019-09-01 to 2019-11-30
+start_date_2 <- as.Date("2019-09-01")
+end_date_2 <- as.Date("2019-11-30")
+data_2 <- data[(data$Date >= start_date_2 & data$Date <= end_date_2), ]
+
+# Date Range 3: From 2019-12-01 to 2020-02-29
+start_date_3 <- as.Date("2019-12-01")
+end_date_3 <- as.Date("2020-02-29")
+data_3 <- data[(data$Date >= start_date_3 & data$Date <= end_date_3), ]
+
+# Date Range 4: From 2020-03-01 to 2020-05-31
+start_date_4 <- as.Date("2020-03-01")
+end_date_4 <- as.Date("2020-05-31")
+data_4 <- data[(data$Date >= start_date_4 & data$Date <= end_date_4), ]
+
+# Date Range 5: From 2020-06-01 to 2020-08-20
+start_date_5 <- as.Date("2020-06-01")
+end_date_5 <- as.Date("2020-08-20")
+data_5 <- data[(data$Date >= start_date_5 & data$Date <= end_date_5), ]
+
+# Combine the data and add a grouping factor
+data_combined <- rbind(
+  data.frame(data_1, group = "2019-06 to 2019-08"),  # Group 1
+  data.frame(data_2, group = "2019-09 to 2019-11"),  # Group 2
+  data.frame(data_3, group = "2019-12 to 2020-02"),  # Group 3
+  data.frame(data_4, group = "2020-03 to 2020-05"),   # Group 4
+  data.frame(data_5, group = "2020-06 to 2020-08")   # Group 5
+)
+
+# Perform One-Way ANOVA on 'money_deal' with 'group' as the independent variable
+anova_result <- aov(money_deal ~ group, data = data_combined)
+
+# Output the summary of the ANOVA test result
+summary(anova_result)
+
+
+```
+```{r}
+# Calculate the average 'money_deal' for each group
+grouped_data <- data_combined %>%
+  group_by(group) %>%
+  summarise(avg_money_deal = mean(money_deal, na.rm = TRUE))
+
+# Create a bar plot to visualize the average 'money_deal' for each date range
+ggplot(grouped_data, aes(x = group, y = avg_money_deal, fill = group)) +
+  geom_bar(stat = "identity", color = "black") +  # Use 'identity' to make the height of the bars represent the calculated mean
+  theme_minimal() +  # Apply a minimal theme to the plot
+  labs(title = "Average Money Deal by Date Range", x = "Date Range", y = "Average Money Deal") +  # Add labels and title
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
+
+```
+# linear regression
+```{r}
+data %>% ggpairs()
+```
+
+```{r}
+qqplot(x = data$count_view, y = df$money_deal)
+```
+
+
+Correlations to choose best variables for money_deal to do linear regression
+```{r}
+ggcorr(data %>% select_if(is.numeric), digits = 12, label = TRUE, name = "Correlations", label_alpha = TRUE)
+```
+
+
+linear regression
+```{r}
+model <- lm(formula = money_deal ~ count_view * bounce_rate * count_visitor, data = df)
+summary(model)
+```
+
+
+Non-constant Variance Test to check Homoscedasticity
+```{r}
+ncvTest(model)
+```
+
+
+F test for linear regression model
+```{r}
+f_test_result <- anova(model)
+print(f_test_result)
+```
+
+```{r}
+# View model summary
+summary(model)
+
+# Obtain residuals
+residuals <- residuals(model)
+
+# Plot residuals vs fitted values
+ggplot(data, aes(x = fitted(model), y = residuals)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(title = "Residuals vs Fitted Values", x = "Fitted values", y = "Residuals")
+
+# Plot residuals vs time
+ggplot(data, aes(x = Date, y = residuals)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(title = "Residuals vs Time", x = "Time", y = "Residuals")
+
+# Use auto.arima to fit an ARIMA model to explore the impact of time factors
+# First, convert residuals to a time series object
+residuals_ts <- ts(residuals, frequency = 1) # Assuming one observation per year
+
+# Fit ARIMA model
+arima_model <- auto.arima(residuals_ts)
+
+# View ARIMA model summary
+summary(arima_model)
+
+```
+
+
+
+

@@ -1,0 +1,8 @@
+flask
+pandas
+numpy
+akshare
+plotly
+scikit-learn
+python-dateutil
+requests

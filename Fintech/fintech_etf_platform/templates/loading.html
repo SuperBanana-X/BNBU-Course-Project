@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Loading Research Workstation</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="loading-shell">
+  <main class="loading-panel">
+    <div class="system-label">Research Workstation Connection Sequence</div>
+    <h1>Initializing System</h1>
+    <div class="progress-track">
+      <div id="progress-bar" class="progress-bar"></div>
+    </div>
+    <div class="progress-meta">
+      <span id="loading-step">Initializing quantitative research workstation...</span>
+      <strong id="progress-value">0%</strong>
+    </div>
+    <ul id="loading-log" class="loading-log"></ul>
+  </main>
+  <script src="{{ url_for('static', filename='js/loading.js') }}"></script>
+</body>
+</html>

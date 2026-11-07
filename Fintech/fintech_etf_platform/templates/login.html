@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NLP-RL Quantitative Trading Platform</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="login-shell">
+  <main class="login-frame">
+    <section class="login-panel">
+      <div class="system-label">Institutional Research Access</div>
+      <h1>NLP-RL Quantitative Trading Platform</h1>
+      <p>Southern Semiconductor ETF Strategy Workstation</p>
+      <form method="post" class="login-form">
+        <label>
+          <span>Username</span>
+          <input type="text" name="username" autocomplete="username" required>
+        </label>
+        <label>
+          <span>Password</span>
+          <input type="password" name="password" autocomplete="current-password" required>
+        </label>
+        <button type="submit">Login</button>
+        <div class="error-area">{{ error }}</div>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

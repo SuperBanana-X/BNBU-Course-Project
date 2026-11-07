@@ -1,0 +1,4 @@
+run_name,with_sentiment,cumulative_return,annualized_return,annualized_volatility,sharpe_ratio,max_drawdown,win_rate,n_trades,profit_factor,benchmark_cumulative_return,excess_return
+DQN with Sentiment Feature,1,-0.055313,-0.077817,0.21297,-0.365392,-0.155368,0.525424,111,0.933636,-0.310301,0.254988
+DQN without Sentiment Feature,0,0.022465,0.032135,0.115168,0.279028,-0.119892,0.514124,128,1.088216,-0.310301,0.332765
+Buy-and-Hold Benchmark,0,-0.310301,-0.410756,0.802829,-0.511636,-0.678536,0.542373,1,0.971075,-0.310301,0.0
